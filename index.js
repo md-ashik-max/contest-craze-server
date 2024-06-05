@@ -30,6 +30,7 @@ async function run() {
         await client.connect();
 
         const userCollection = client.db("contestDB").collection("users");
+        const contestsCollection = client.db("contestDB").collection("contests");
 
 
         // user related api
@@ -38,6 +39,34 @@ async function run() {
         app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result)
+        })
+
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            // if (email !== req.decoded.email) {
+            //     res.status(403).send({ message: 'forbidden access' })
+            // }
+            const query = { email: email }
+            const user = await userCollection.findOne(query)
+            let admin = false;
+            if (user) {
+                admin = user?.role === 'admin'
+            }
+            res.send({ admin })
+        })
+
+        app.get('/users/creator/:email', async (req, res) => {
+            const email = req.params.email;
+            // if (email !== req.decoded.email) {
+            //     res.status(403).send({ message: 'forbidden access' })
+            // }
+            const query = { email: email }
+            const user = await userCollection.findOne(query)
+            let creator = false;
+            if (user) {
+                creator = user?.role === 'creator'
+            }
+            res.send({ creator })
         })
 
 
@@ -82,6 +111,33 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await userCollection.deleteOne(query)
+            res.send(result)
+        })
+
+
+        // contest related api 
+
+        app.get('/contests', async (req, res) => {
+            const result = await contestsCollection.find().toArray();
+            res.send(result)
+        })
+
+        app.post('/contests', async (req, res) => {
+            const item = req.body;
+            const result = await contestsCollection.insertOne(item);
+            res.send(result)
+
+        })
+
+        app.patch('/contests/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    status: 'success'
+                }
+            }
+            const result = await contestsCollection.updateOne(filter, updatedDoc)
             res.send(result)
         })
 
