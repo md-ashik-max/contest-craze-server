@@ -122,6 +122,28 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/contests/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await contestsCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/contests/creator/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { creatorEmail: email };
+            const result = await contestsCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        app.get('/contests/confirm/:status', async (req, res) => {
+            const status = req.params.status;
+            const query = { status: status };
+            const result = await contestsCollection.find(query).toArray();
+            res.send(result)
+
+        })
+
         app.post('/contests', async (req, res) => {
             const item = req.body;
             const result = await contestsCollection.insertOne(item);
@@ -138,6 +160,36 @@ async function run() {
                 }
             }
             const result = await contestsCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
+
+        app.patch('/contests/update/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    name:item.name,
+                    image:item.image,
+                    price:item.price,
+                    category:item.category,
+                    description:item.description,
+                    prizeMoney:item.prizeMoney,
+                    instruction:item.instruction,
+                    deadline:item.deadline,
+                    creatorName:item.creatorName,
+                    creatorEmail:item.creatorEmail,
+                    creatorPhoto:item.creatorPhoto
+                }
+            }
+            const result = await contestsCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        app.delete('/contests/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await contestsCollection.deleteOne(query)
             res.send(result)
         })
 
