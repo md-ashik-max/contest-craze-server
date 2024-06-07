@@ -167,12 +167,12 @@ async function run() {
 
         app.patch('/contests/participant/:id', async (req, res) => {
             const id = req.params.id;
-            const { participants } = req.body; 
+            const { participants } = req.body;
             // console.log("Received participants value:", participants);
 
             const updatedParticipants = Number(participants);
 
-    
+
             // console.log("Converted participants value:", updatedParticipants);
             const filter = { _id: new ObjectId(id) }
             const updatedDoc = {
@@ -236,6 +236,8 @@ async function run() {
             res.send(paymentResult)
 
         })
+
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
