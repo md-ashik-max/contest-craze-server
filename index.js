@@ -32,6 +32,7 @@ async function run() {
 
         const userCollection = client.db("contestDB").collection("users");
         const contestsCollection = client.db("contestDB").collection("contests");
+        const paymentCollection = client.db("contestDB").collection("payments");
 
 
         // user related api
@@ -164,23 +165,42 @@ async function run() {
             res.send(result)
         })
 
+        app.patch('/contests/participant/:id', async (req, res) => {
+            const id = req.params.id;
+            const { participants } = req.body; 
+            // console.log("Received participants value:", participants);
+
+            const updatedParticipants = Number(participants);
+
+    
+            // console.log("Converted participants value:", updatedParticipants);
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    participants: Number(participants)
+                }
+            }
+            const result = await contestsCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
+
         app.patch('/contests/update/:id', async (req, res) => {
             const item = req.body;
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const updateDoc = {
                 $set: {
-                    name:item.name,
-                    image:item.image,
-                    price:item.price,
-                    category:item.category,
-                    description:item.description,
-                    prizeMoney:item.prizeMoney,
-                    instruction:item.instruction,
-                    deadline:item.deadline,
-                    creatorName:item.creatorName,
-                    creatorEmail:item.creatorEmail,
-                    creatorPhoto:item.creatorPhoto
+                    name: item.name,
+                    image: item.image,
+                    price: item.price,
+                    category: item.category,
+                    description: item.description,
+                    prizeMoney: item.prizeMoney,
+                    instruction: item.instruction,
+                    deadline: item.deadline,
+                    creatorName: item.creatorName,
+                    creatorEmail: item.creatorEmail,
+                    creatorPhoto: item.creatorPhoto
                 }
             }
             const result = await contestsCollection.updateOne(filter, updateDoc)
@@ -196,17 +216,25 @@ async function run() {
 
         // payment related api 
 
-        app.post('/create-payment-intent',async(req,res)=>{
-            const{price}=req.body;
-            const amount = parseInt(price*100);
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            // console.log(amount,'payment inside')
             const paymentIntent = await stripe.paymentIntents.create({
-                amount:amount,
-                currency:"usd",
-                payment_method_types:["card"]
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ["card"]
             });
             res.send({
-                clientSecret:paymentIntent.client_secret
+                clientSecret: paymentIntent.client_secret
             })
+        })
+
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const paymentResult = await paymentCollection.insertOne(payment)
+            res.send(paymentResult)
+
         })
 
         // Send a ping to confirm a successful connection
