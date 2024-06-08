@@ -63,11 +63,34 @@ async function run() {
 
         }
 
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.decoded.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isAdmin = user?.role === "admin";
+            if (!isAdmin) {
+                res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        }
+
+        const verifyCreator = async (req, res, next) => {
+            const email = req.decoded.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isCreator = user?.role === "creator";
+            if (!isCreator) {
+                res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        }
+
+
 
         // user related api
 
 
-        app.get('/users', async (req, res) => {
+        app.get('/users',verifyToken,verifyAdmin, async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result)
         })
@@ -160,7 +183,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/contests/creator/:email',verifyToken, async (req, res) => {
+        app.get('/contests/creator/:email',verifyToken,verifyCreator, async (req, res) => {
             const email = req.params.email;
             const query = { creatorEmail: email };
             const result = await contestsCollection.find(query).toArray();
