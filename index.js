@@ -45,6 +45,24 @@ async function run() {
         })
 
 
+        // middleware
+
+        const verifyToken = (req, res, next) => {
+            console.log("Inside VerifyToken",req.headers.authorization)
+            if (!req.headers.authorization) {
+                return res.status(401).send({ message: 'unauthorized access' })
+            }
+            const token = req.headers.authorization.split(' ')[1]
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'unauthorized access' })
+                }
+                req.decoded = decoded;
+                next()
+            });
+
+        }
+
 
         // user related api
 
@@ -142,7 +160,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/contests/creator/:email', async (req, res) => {
+        app.get('/contests/creator/:email',verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { creatorEmail: email };
             const result = await contestsCollection.find(query).toArray();
