@@ -34,6 +34,7 @@ async function run() {
         const userCollection = client.db("contestDB").collection("users");
         const contestsCollection = client.db("contestDB").collection("contests");
         const paymentCollection = client.db("contestDB").collection("payments");
+        const submitContestCollection = client.db("contestDB").collection("submitContest");
 
 
         // jwt
@@ -48,7 +49,7 @@ async function run() {
         // middleware
 
         const verifyToken = (req, res, next) => {
-            console.log("Inside VerifyToken",req.headers.authorization)
+            // console.log("Inside VerifyToken",req.headers.authorization)
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
@@ -198,7 +199,7 @@ async function run() {
 
         })
 
-        app.post('/contests', async (req, res) => {
+        app.post('/contests',verifyToken,verifyCreator, async (req, res) => {
             const item = req.body;
             const result = await contestsCollection.insertOne(item);
             res.send(result)
@@ -236,7 +237,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/contests/update/:id', async (req, res) => {
+        app.patch('/contests/update/:id',verifyToken,verifyCreator, async (req, res) => {
             const item = req.body;
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
@@ -281,6 +282,10 @@ async function run() {
                 clientSecret: paymentIntent.client_secret
             })
         })
+        app.get('/payments', async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+            res.send(result)
+        })
 
         app.get('/payments/:email', async (req, res) => {
             const email = req.params.email;
@@ -294,6 +299,36 @@ async function run() {
             const paymentResult = await paymentCollection.insertOne(payment)
             res.send(paymentResult)
 
+        })
+
+        app.patch('/payments/submitted/:id',async(req,res)=>{
+            const id=req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    contestSubmit: 'success',
+                    
+                }
+            }
+            const result = await paymentCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        // submitContest related
+
+        app.get('/submitContest/:name',async (req,res)=>{
+            const name=req.params.name;
+            console.log(name)
+            const query={contestName:name}
+            const result = await submitContestCollection.find(query).toArray();
+            console.log(result)
+            res.send(result)
+        })
+
+        app.post('/submitContest',async(req,res)=>{
+            const submitContest=req.body;
+            const submitResult= await submitContestCollection.insertOne(submitContest)
+            res.send(submitResult)
         })
 
 
