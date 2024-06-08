@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const stripe = require("stripe")(process.env.STRIPE_PAYMENT_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
@@ -33,6 +34,16 @@ async function run() {
         const userCollection = client.db("contestDB").collection("users");
         const contestsCollection = client.db("contestDB").collection("contests");
         const paymentCollection = client.db("contestDB").collection("payments");
+
+
+        // jwt
+
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send({ token })
+        })
+
 
 
         // user related api
