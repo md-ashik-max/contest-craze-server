@@ -318,10 +318,21 @@ async function run() {
 
         app.get('/submitContest/:name',async (req,res)=>{
             const name=req.params.name;
-            console.log(name)
             const query={contestName:name}
             const result = await submitContestCollection.find(query).toArray();
-            console.log(result)
+            res.send(result)
+        })
+
+        app.patch('/submitContest/:id',verifyToken,verifyCreator,async(req,res)=>{
+            const id=req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    contestWinner: 'winner',
+                    
+                }
+            }
+            const result = await submitContestCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
 
