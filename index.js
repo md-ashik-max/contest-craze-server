@@ -218,6 +218,19 @@ async function run() {
             res.send(result)
         })
 
+        app.patch('/contests/adminComment/:id', async (req, res) => {
+            const id = req.params.id;
+            const comment = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    comment: comment
+                }
+            }
+            const result = await contestsCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
+
         app.patch('/contests/participant/:id', async (req, res) => {
             const id = req.params.id;
             const { participants } = req.body;
@@ -315,6 +328,21 @@ async function run() {
         })
 
         // submitContest related
+
+        app.get('/submitContest/byEmail/:email',async(req,res)=>{
+            const email = req.params.email;
+            const query = { participantEmail: email };
+            const result = await submitContestCollection.find(query).toArray();
+            // console.log(result)
+            res.send(result)
+        })
+
+        app.get('/submitContest/contestWinner/:winner', async(req,res)=>{
+            const winner = req.params.winner;
+            const query = { contestWinner: winner };
+            const result = await submitContestCollection.find(query).toArray();
+            res.send(result)
+        })
 
         app.get('/submitContest/:name',async (req,res)=>{
             const name=req.params.name;
