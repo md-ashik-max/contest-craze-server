@@ -104,11 +104,11 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users/admin/:email',verifyToken, async (req, res) => {
+        app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
-            if (email !== req.decoded.email) {
-                res.status(403).send({ message: 'forbidden access' })
-            }
+            // if (email !== req.decoded.email) {
+            //     res.status(403).send({ message: 'forbidden access' })
+            // }
             const query = { email: email }
             const user = await userCollection.findOne(query)
             let admin = false;
@@ -118,11 +118,11 @@ async function run() {
             res.send({ admin })
         })
 
-        app.get('/users/creator/:email',verifyToken, async (req, res) => {
+        app.get('/users/creator/:email', async (req, res) => {
             const email = req.params.email;
-            if (email !== req.decoded.email) {
-                res.status(403).send({ message: 'forbidden access' })
-            }
+            // if (email !== req.decoded.email) {
+            //     res.status(403).send({ message: 'forbidden access' })
+            // }
             const query = { email: email }
             const user = await userCollection.findOne(query)
             let creator = false;
